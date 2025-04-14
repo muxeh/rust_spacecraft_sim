@@ -12,10 +12,10 @@ struct StateRow {
     wx: f32,
     wy: f32,
     wz: f32,
-    qw: f32,
     qi: f32,
     qj: f32,
-    qk: f32
+    qk: f32,
+    qw: f32
 }
 
 #[derive(Debug, Deserialize)]
@@ -110,10 +110,10 @@ fn main() -> Result<(), config::ConfigError> {
             wx: w.x,
             wy: w.y,
             wz: w.z,
-            qw: q_i2b.w,
             qi: q_i2b.i,
             qj: q_i2b.j,
-            qk: q_i2b.k
+            qk: q_i2b.k,
+            qw: q_i2b.w
         });
     }
     
