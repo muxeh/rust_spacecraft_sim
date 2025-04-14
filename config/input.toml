@@ -1,0 +1,14 @@
+[sim]
+dt = 0.01
+t_f = 10.0
+log_path = "logs/"
+log_name = "spacecraft_state.csv"
+
+[vehicle_props]
+moi = [[1, 0, 0],
+       [0, 1, 0],
+       [0, 0, 1]]
+
+[initial_state]
+w_body_0 = [0, 0, 0]
+q_i2b_0 = [0, 0, 0, 1]
