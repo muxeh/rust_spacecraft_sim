@@ -13,10 +13,12 @@ A Rust-based spacecraft simulation for modeling dynamics and control systems.
    cd rust_spacecraft_sim
 
 2. (For plotting) Set up Python environment and install dependencies:
+```
    python3 -m venv venv
    source venv/bin/activate  # macOS/Linux
    venv\Scripts\activate     # Windows
    pip install -r requirements.txt
+```
 
 ## Use
 1. Build the project:
