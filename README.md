@@ -9,8 +9,10 @@ A Rust-based spacecraft simulation for modeling dynamics and control systems.
 
 ### Installation
 1. Clone the repo:
-   git clone https://github.com/muxeh/rust_spacecraft_sim.git
-   cd rust_spacecraft_sim
+```
+git clone https://github.com/muxeh/rust_spacecraft_sim.git
+cd rust_spacecraft_sim
+```
 
 2. (For plotting) Set up Python environment and install dependencies:
 ```
