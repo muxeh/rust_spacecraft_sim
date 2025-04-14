@@ -22,7 +22,8 @@ struct StateRow {
 struct Config {
     sim: Sim,
     vehicle_props: VehicleProperties,
-    initial_state: InitialState,
+    initial_conditions: InitialConditions,
+    initial_state: InitialState
 }
 
 #[derive(Debug, Deserialize)]
@@ -39,8 +40,13 @@ struct VehicleProperties {
 }
 
 #[derive(Debug, Deserialize)]
+struct InitialConditions {
+    tau: [f32; 3]
+}
+
+#[derive(Debug, Deserialize)]
 struct InitialState {
-    w_body_0: [f32; 3],
+    w_0: [f32; 3],
     q_i2b_0: [f32; 4]
 }
 
@@ -51,6 +57,7 @@ fn main() -> Result<(), config::ConfigError> {
         .add_source(config::File::with_name("config/input"))
         .build()?
         .try_deserialize()?;
+
     // Simulation configuration
     // Time step of simulation (s)
     let dt: f32 = config.sim.dt;
@@ -65,15 +72,17 @@ fn main() -> Result<(), config::ConfigError> {
     // Log file name
     let log_name = config.sim.log_name;
 
-    // Dynamics definitions
-    // Initial angular velocity in the body frame (rad/s)
-    let mut w = Vector3::from(config.initial_state.w_body_0);
-    // Torque in the body frame (N*m)
-    let tau = Vector3::new(-0.5f32, 0.5f32, -0.5f32);
-    // Inertia tensor matrix (kg*m^2)
+    // Vehicle configuration
+    // Moment of inertia tensor matrix (kg*m^2)
     let moi = Matrix3::from(config.vehicle_props.moi);
     // Compute the inverse of moi
     let moi_inv = moi.try_inverse().unwrap();
+    // Torque in the body frame (N*m) -- constant for now
+    let tau = Vector3::from(config.initial_conditions.tau);
+
+    // Initial state
+    // Initial angular velocity in the body frame (rad/s)
+    let mut w = Vector3::from(config.initial_state.w_0);
     // Initial attitude quaternion (inertial to body)
     let q_in: Quaternion<f32> = Quaternion::from_vector(config.initial_state.q_i2b_0.into());
     let mut q_i2b: UnitQuaternion<f32> = UnitQuaternion::from_quaternion(q_in);
