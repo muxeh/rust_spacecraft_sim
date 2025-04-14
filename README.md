@@ -21,10 +21,12 @@ A Rust-based spacecraft simulation for modeling dynamics and control systems.
 ## Use
 1. Build the project:
    `cargo build`
-2. Run the simulation
-   `cargo run`
+2. Configure simulation case as desired in `configs/input.toml`
 3. Run the simulation
-   TODO
+   `cargo run`
+4. Plot simulation results
+   `cd scripts`
+   `python3 plotter.py`
 
 ## Contributing
 Feel free to open issues or submit pull requests!
