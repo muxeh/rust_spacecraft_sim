@@ -1,18 +1,28 @@
 [sim]
+# Simulation time step
 dt = 0.01
+# Simulation termination time
 t_f = 10.0
+# Print every percentage of termination time
+t_print_pct = 10.0
+# Path to logs folder
 log_path = "logs/"
+# Simulation log file name
 log_name = "spacecraft_state.csv"
 
 [vehicle_props]
+# moment of inertia tensor (kg*m^2)
 moi = [[1, 0, 0],
        [0, 1, 0],
        [0, 0, 1]]
 
 [initial_conditions]
-tau = [0, 0, 0]
+# External torque (N*m)
+torque = [0, 0, 0]
 
 [initial_state]
+# Angular velocity of body frame (rad/s)
 w_0 = [0.5, -0.5, 1]
+# Attitude (inertial to body) [--]
 q_i2b_0 = [0, 0, 0, 1]
 

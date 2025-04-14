@@ -7,7 +7,7 @@ mod logger; // Import the csv_writer module
 use logger::write_to_csv; // Import the function
 
 #[derive(Serialize)]
-struct StateRow {
+struct LogRow {
     time: f32,
     wx: f32,
     wy: f32,
@@ -30,6 +30,7 @@ struct Config {
 struct Sim {
     dt: f32,
     t_f: f32,
+    t_print_pct: f32,
     log_path: String,
     log_name: String
 }
@@ -41,7 +42,7 @@ struct VehicleProperties {
 
 #[derive(Debug, Deserialize)]
 struct InitialConditions {
-    tau: [f32; 3]
+    torque: [f32; 3]
 }
 
 #[derive(Debug, Deserialize)]
@@ -65,6 +66,9 @@ fn main() -> Result<(), config::ConfigError> {
     let t_f: f32 = config.sim.t_f;
     // Number of iterations in simulation
     let num_iter = (t_f / dt).floor() as usize;
+    // Time printout percentage
+    let t_print_pct = config.sim.t_print_pct;
+    let t_print_divisor = (t_f * (t_print_pct / 100.0)).floor() as f32;
     // Data buffer for writing to file
     let mut data_buffer = Vec::with_capacity(num_iter);
     // Logs path
@@ -78,7 +82,7 @@ fn main() -> Result<(), config::ConfigError> {
     // Compute the inverse of moi
     let moi_inv = moi.try_inverse().unwrap();
     // Torque in the body frame (N*m) -- constant for now
-    let tau = Vector3::from(config.initial_conditions.tau);
+    let torque = Vector3::from(config.initial_conditions.torque);
 
     // Initial state
     // Initial angular velocity in the body frame (rad/s)
@@ -86,11 +90,14 @@ fn main() -> Result<(), config::ConfigError> {
     // Initial attitude quaternion (inertial to body)
     let q_in: Quaternion<f32> = Quaternion::from_vector(config.initial_state.q_i2b_0.into());
     let mut q_i2b: UnitQuaternion<f32> = UnitQuaternion::from_quaternion(q_in);
-
+    // Print start of sim
+    println!("Simulation Start");
     // Main loop
     for ii in 0..=num_iter {
+        // Compute current time
+        let t = dt * ii as f32;
         // Calculate angular acceleration (rad/s^2)
-        let w_dot = moi_inv * (tau - w.cross(&(moi * w)));
+        let w_dot = moi_inv * (torque - w.cross(&(moi * w)));
         // Integrate angular accelaration to get angular velocity
         w = w + w_dot * dt;
         // Integrate angular velocity to get delta-angle vector (rad)
@@ -102,10 +109,8 @@ fn main() -> Result<(), config::ConfigError> {
         let dq = UnitQuaternion::from_axis_angle(&eigen_axis, eigen_angle);
         // Rotate attitude with dq
         q_i2b = UnitQuaternion::from_quaternion(*q_i2b * *dq);
-        // Compute current time
-        let t = dt * ii as f32;
-        // Push current angular velocity to buffer
-        data_buffer.push(StateRow {
+        // Push current log row buffer
+        data_buffer.push(LogRow {
             time: t,
             wx: w.x,
             wy: w.y,
@@ -115,7 +120,14 @@ fn main() -> Result<(), config::ConfigError> {
             qk: q_i2b.k,
             qw: q_i2b.w
         });
+        // Print time if current time is multiple of divisor
+        if t % t_print_divisor == 0.0 {
+            println!("+ Time Elapsed (s): {}", t);
+        }
     }
+
+    // Print completion of sim
+    println!("Simulation Complete");
     
     // Write data buffer to csv
     if let Err(e) = write_to_csv(&data_buffer, &(log_path + &log_name)) {

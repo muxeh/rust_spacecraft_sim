@@ -20,7 +20,7 @@ where
     // Flush the writer to ensure data is written to the file
     writer.flush()?;
 
-    println!("Data saved to {}", filename);
+    println!("Log file saved to {}", filename);
 
     Ok(())
 }
